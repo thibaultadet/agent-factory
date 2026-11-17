@@ -1,6 +1,6 @@
 ---
 name: push-pr
-description: Cleans the branch's commits, checks the sandcastle pre-review points, pushes it and opens (or updates) a GitHub PR with a body per the pr skill. Use when the user wants to open a PR or submit their work for review.
+description: Cleans the branch's commits, checks the pre-review points, pushes it and opens (or updates) a GitHub PR with a body per the pr skill. Use when the user wants to open a PR or submit their work for review.
 allowed-tools: Bash, Skill
 ---
 
@@ -17,14 +17,14 @@ Done when you know the commits, the changed files, whether the branch is on the 
 
 ## 2. Check the pre-review points
 
-Only when a PR exists. The **pre-review** is its latest comment whose body starts with `<!-- sandcastle-pr-check -->`:
+Only when a PR exists. The **pre-review** is its latest comment whose body starts with `<!-- pre-review -->`:
 ```sh
 gh api repos/{owner}/{repo}/issues/<n>/comments --paginate \
-  --jq '[.[] | select(.body | startswith("<!-- sandcastle-pr-check -->"))] | last | .body'
+  --jq '[.[] | select(.body | startswith("<!-- pre-review -->"))] | last | .body'
 ```
 No such comment → skip to step 3.
 
-Each numbered point gets a verdict, from the code as it is now: ✅ addressed (name the commit or `file:line`) · 🔴 still open · ⚪ false positive (say why). Keep the pre-review's numbering and wording: every point stays listed, whatever its verdict. The comment itself stays as sandcastle wrote it; the verdicts go in the PR body (step 4).
+Each numbered point gets a verdict, from the code as it is now: ✅ addressed (name the commit or `file:line`) · 🔴 still open · ⚪ false positive (say why). Keep the pre-review's numbering and wording: every point stays listed, whatever its verdict. The comment itself stays as the reviewing agent wrote it; the verdicts go in the PR body (step 4).
 
 Show the table to the user. Any 🔴 → ask whether to fix it first or push as is.
 

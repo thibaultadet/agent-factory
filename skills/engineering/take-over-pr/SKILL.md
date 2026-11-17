@@ -1,6 +1,6 @@
 ---
 name: take-over-pr
-description: Take over a PR, typically one a sandcastle run opened. Rebase it on main (or sync its stack when stacked), resolve conflicts, then do a quick review against the spec and the pre-review points.
+description: Take over a PR, typically one an agent opened. Rebase it on main (or sync its stack when stacked), resolve conflicts, then do a quick review against the spec and the pre-review points.
 disable-model-invocation: true
 ---
 
@@ -43,7 +43,7 @@ Read the body of every sibling whose title touches what the PR does.
 
 **Mockup**: the design the issue or PRD names (a mockup file, a design artifact link, a board the repo's design index maps to the issue). The repo's verification skill says how to render it next to the app.
 
-**Pre-review**: the latest PR comment whose body starts with `<!-- sandcastle-pr-check -->`. Its numbered points are the attention points. Its `Manual:` line lists checks only a human can run.
+**Pre-review**: the latest PR comment whose body starts with `<!-- pre-review -->`. Its numbered points are the attention points. Its `Manual:` line lists checks only a human can run.
 
 If the spec or the pre-review is missing, say so and review with the one you have.
 
