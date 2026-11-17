@@ -1,6 +1,6 @@
 ---
 name: catch-up
-description: Big-picture overview, then interactive zone-by-zone walkthrough of a branch an agent (sandcastle) built, so a human stays familiar with the codebase without re-reading every changed line. Explains how the new/changed models, controllers, services etc. work, then flags where a human eye is worth it. Use after a sandcastle run, to catch up on a branch, or when the user wants a guided review of "what changed and where to look".
+description: Big-picture overview, then interactive zone-by-zone walkthrough of a branch an agent built, so a human stays familiar with the codebase without re-reading every changed line. Explains how the new/changed models, controllers, services etc. work, then flags where a human eye is worth it. Use after an agent run, to catch up on a branch, or when the user wants a guided review of "what changed and where to look".
 allowed-tools: Bash, Read, Grep, Glob, Write
 ---
 

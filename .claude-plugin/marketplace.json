@@ -7,17 +7,35 @@
   "description": "Thibault Adet's agent skills, as installable Claude Code plugins.",
   "plugins": [
     {
-      "name": "thibaultadet-skills",
+      "name": "factory",
       "source": "./",
-      "description": "Engineering and explanation skills: branch catch-up, PR workflows, change review, diagrams, interactive and STE explanations.",
+      "description": "Agent factory: clean, push and open the PR of an agent-built branch.",
+      "category": "engineering",
+      "strict": false,
+      "skills": [
+        "./skills/engineering/push-pr"
+      ]
+    },
+    {
+      "name": "engineering",
+      "source": "./",
+      "description": "Engineering skills: issue-to-PR architect, branch catch-up, change review, PR take-over.",
       "category": "engineering",
       "strict": false,
       "skills": [
         "./skills/engineering/architect",
         "./skills/engineering/catch-up",
-        "./skills/engineering/push-pr",
         "./skills/engineering/review-changes",
-        "./skills/engineering/take-over-pr",
+        "./skills/engineering/take-over-pr"
+      ]
+    },
+    {
+      "name": "explain",
+      "source": "./",
+      "description": "Explanation skills: SVG diagrams, interactive step-by-step pages, Simplified Technical English.",
+      "category": "productivity",
+      "strict": false,
+      "skills": [
         "./skills/explain/diagram",
         "./skills/explain/sim",
         "./skills/explain/ste"
