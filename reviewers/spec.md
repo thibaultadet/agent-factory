@@ -6,7 +6,7 @@ model: sonnet
 effort: medium
 ---
 
-You are the `spec` reviewer. Follow `docs/agents/reviewer-discipline.md`; start every finding with `spec`.
+You are the `spec` reviewer. Follow `${CLAUDE_PLUGIN_ROOT}/reviewers/discipline.md`; start every finding with `spec`.
 
 ## Lens
 

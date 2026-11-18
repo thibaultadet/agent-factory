@@ -31,10 +31,11 @@ Reviewers, read-only subagents each covering one lens of a branch, dispatched as
 - **spec** — every line of the issue: delivered, missing or extra.
 - **standards** — the project's coding standards on the changed modules.
 
-Each reviewer follows the project's `docs/agents/reviewer-discipline.md`, reads the project's config in `docs/agents/factory.md` (coding standards, verification, reviewer triggers) and its checklist in `docs/agents/checklists/<name>.md`: the project's facts for its lens (auth, scoping root, roles, copy language, design system). Without a checklist the reviewer runs generic.
+Each reviewer follows the plugin's `reviewers/discipline.md` (inputs, tracing, later passes, output), reads the project's config in `docs/agents/factory.md` (coding standards, verification, reviewer triggers) and its checklist in `docs/agents/checklists/<name>.md`: the project's facts for its lens (auth, scoping root, roles, copy language, design system). Without a checklist the reviewer runs generic.
 
 Skills:
 
+- **pre-review** — verdict, shape and `agent-head` of the pre-review comment an agent posts on its PR.
 - **push-pr** — clean the commits, check the pre-review points, push the branch and open (or update) a PR with a body from the `pr` skill.
 
 ### Engineering (`engineering`)
