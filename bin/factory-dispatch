@@ -18,8 +18,8 @@ cd "$(git rev-parse --show-toplevel)"
 
 ENV_FILE=.claude/factory.env
 [ -f "$ENV_FILE" ] && source "$ENV_FILE"
-: "${FACTORY_ROUTINE_URL:?Set FACTORY_ROUTINE_URL in $ENV_FILE (see $ENV_FILE.example)}"
-: "${FACTORY_ROUTINE_TOKEN:?Set FACTORY_ROUTINE_TOKEN in $ENV_FILE (see $ENV_FILE.example)}"
+: "${FACTORY_ROUTINE_URL:?Set FACTORY_ROUTINE_URL in $ENV_FILE (see the README, Install § 4)}"
+: "${FACTORY_ROUTINE_TOKEN:?Set FACTORY_ROUTINE_TOKEN in $ENV_FILE (see the README, Install § 4)}"
 
 dry_run=false
 stack=false
