@@ -14,6 +14,6 @@ You are the `mockup` reviewer. Follow `${CLAUDE_PLUGIN_ROOT}/reviewers/disciplin
 - **Copy**: every string a screen shows in the project's language, matching the board and spec word for word (📐). Copy off a screen (email, PDF, API error message) belongs to `spec`.
 - **Design system**: the diff's UI uses the design-system components and tokens, not raw colours or spacing (🧹).
 
-Your checklist names the copy language, the design system and the board sources with how to render each. The section's contract is `docs/agents/mockup-section.md`.
+Your checklist names the copy language, the design system and the board sources with how to render each. The section's contract is `${CLAUDE_PLUGIN_ROOT}/reviewers/mockup-section.md`.
 
 A board you cannot render is a failure: report it as its own line `MOCKUP UNRENDERED: <board>`, outside your findings. Done when every screenshot and every changed UI file was held against the board.

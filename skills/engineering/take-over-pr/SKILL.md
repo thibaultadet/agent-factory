@@ -23,17 +23,14 @@ A PR whose `baseRefName` is not `main` is **stacked**: its parent is another PR'
 - `git merge-base --is-ancestor origin/main HEAD` succeeds → already up to date. Skip to step 3.
 - Otherwise run `git rebase origin/main`. On conflict, invoke the `resolving-merge-conflicts` skill. The PR's intent comes from its body and linked issue. `main`'s intent comes from the commits that landed since the branch diverged.
 - After a rebase, run the checks for the areas the PR touches:
-  - `api/` changed: rubocop on the changed Ruby files only, then `bundle exec rspec`:
-    `cd api && git diff --name-only --diff-filter=d --relative origin/main...HEAD -- '*.rb' '*.rake' '*.jb' Gemfile | xargs -r bundle exec rubocop --force-exclusion`
-    Keep the `xargs -r` form: an empty file list must skip rubocop, not lint the whole app. Scope rspec to the specs of the changed code and of the code that caused a conflict. The whole suite runs in CI.
-  - `web/` changed: `cd web && bun run lint`.
+  - Run the lint then test commands of `docs/agents/factory.md` § Feedback loops for each area the PR touches. Scope the tests to the changed code and the code that caused a conflict; the whole suite runs in CI.
 - Leave the rebased branch local. Pushing is the user's call.
 
 Done when the branch contains `origin/main` and the checks are green. If a check stays red after one honest fix attempt, stop and report it.
 
 ## 3. Gather the review inputs
 
-**Spec**: the issues the PR implements. Look in the `## Issues` section of the PR body, in `closingIssuesReferences`, and in the branch name (`issue/<n>`). Read each issue with `gh issue view <n> --json title,state,body,comments` (plain `--comments` can print nothing), and follow its parent PRD when it names one. An `## Interface` section in an issue is a contract (see `docs/coding-standards.md`).
+**Spec**: the issues the PR implements. Look in the `## Issues` section of the PR body, in `closingIssuesReferences`, and in the branch name (`issue/<n>`). Read each issue with `gh issue view <n> --json title,state,body,comments` (plain `--comments` can print nothing), and follow its parent PRD when it names one. An `## Interface` section in an issue is a contract (see the coding standards doc `docs/agents/factory.md` § Coding standards names).
 
 **Siblings**: the other issues of that PRD own the work this PR leaves out. Find the parent with `gh api 'repos/{owner}/{repo}/issues/<n>/parent' --jq .number` (404: none) or the PRD the issue names, then list its sub-issues:
 ```sh
