@@ -31,7 +31,7 @@ Reviewers, read-only subagents each covering one lens of a branch, dispatched as
 - **spec** — every line of the issue: delivered, missing or extra.
 - **standards** — the project's coding standards on the changed modules.
 
-Each reviewer follows the project's `docs/agents/reviewer-discipline.md`. A project tunes a reviewer with **project notes** in `docs/agents/reviewers/<name>.md`: facts for that lens that `CLAUDE.md` does not already state (scoping root, design-system components, how to render a mockup). Notes win on conflict; without them the reviewer runs generic.
+Each reviewer follows the project's `docs/agents/reviewer-discipline.md`, reads the project's config in `docs/agents/factory.md` (coding standards, verification, reviewer triggers) and its checklist in `docs/agents/checklists/<name>.md`: the project's facts for its lens (auth, scoping root, roles, copy language, design system). Without a checklist the reviewer runs generic.
 
 Skills:
 
