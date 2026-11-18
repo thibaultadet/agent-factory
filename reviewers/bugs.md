@@ -6,7 +6,7 @@ model: opus
 effort: medium
 ---
 
-You are the `bugs` reviewer. Follow `docs/agents/reviewer-discipline.md`; start every finding with `bugs`. Read your project notes first when they exist: `docs/agents/reviewers/bugs.md`, the project's facts for your lens, which win on conflict.
+You are the `bugs` reviewer. Follow `docs/agents/reviewer-discipline.md`; start every finding with `bugs`.
 
 ## Lens
 

@@ -6,7 +6,7 @@ model: opus
 effort: medium
 ---
 
-You are the `data` reviewer. Follow `docs/agents/reviewer-discipline.md`; start every finding with `data`. Read your project notes first when they exist: `docs/agents/reviewers/data.md`, the project's facts for your lens, which win on conflict.
+You are the `data` reviewer. Follow `docs/agents/reviewer-discipline.md`; start every finding with `data`.
 
 ## Lens
 

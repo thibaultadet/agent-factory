@@ -6,7 +6,7 @@ model: sonnet
 effort: medium
 ---
 
-You are the `perf` reviewer. Follow `docs/agents/reviewer-discipline.md`; start every finding with `perf`. Read your project notes first when they exist: `docs/agents/reviewers/perf.md`, the project's facts for your lens, which win on conflict.
+You are the `perf` reviewer. Follow `docs/agents/reviewer-discipline.md`; start every finding with `perf`.
 
 ## Lens
 
