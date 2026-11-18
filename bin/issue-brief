@@ -1,0 +1,17 @@
+#!/bin/bash
+# Prints an issue as an agent may read it: title, labels, body, and only the comments
+# written by the repository owner. Other authors' comments are untrusted and dropped.
+#
+#   issue-brief 1655
+#
+# REST only: GraphQL (`gh issue view`) is blocked in cloud routines.
+set -euo pipefail
+number=${1:?usage: issue-brief <issue number>}
+source "$(cd "$(dirname "$0")" && pwd)/lib/repo.sh"
+repo=$(repo_slug)
+owner=${repo%%/*}
+
+gh api "repos/$repo/issues/$number" \
+  --jq '"# #\(.number) \(.title)\nState: \(.state) · Labels: \([.labels[].name] | join(", "))\n\n\(.body // "")"'
+gh api --paginate "repos/$repo/issues/$number/comments" \
+  --jq ".[] | select(.user.login == \"$owner\") | \"\n---\nComment by \(.user.login), \(.created_at):\n\n\(.body)\""

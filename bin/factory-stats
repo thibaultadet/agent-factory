@@ -1,0 +1,70 @@
+#!/bin/bash
+set -euo pipefail
+lib="$(cd "$(dirname "$0")" && pwd)/lib"
+source "$lib/repo.sh"
+
+usage() { echo "usage: factory-stats [--since=YYYY-MM-DD]" >&2; exit 2; }
+
+since=$(jq -rn 'now - 30 * 86400 | strftime("%F")')
+for arg in "$@"; do
+  case "$arg" in
+    --since=*) since=${arg#--since=} ;;
+    *) usage ;;
+  esac
+done
+[[ $since =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] && jq -en --arg s "$since" '$s + "T00:00:00Z" | fromdate | strftime("%F") == $s' >/dev/null 2>&1 || usage
+
+repo=$(repo_slug)
+
+prs='[]'
+page=1
+while :; do
+  batch=$(gh api "repos/$repo/pulls?state=all&sort=created&direction=desc&per_page=100&page=$page" \
+    --jq '{n: length, last: .[-1].created_at, prs: [.[] | select(.head.ref | startswith("claude/"))
+          | {number, created_at, merged_at, state, merge: .merge_commit_sha}]}')
+  prs=$(jq -c --argjson b "$batch" --arg s "$since" '. + [$b.prs[] | select(.created_at >= $s)]' <<<"$prs")
+  [ "$(jq .n <<<"$batch")" -lt 100 ] && break
+  [ "$(jq -r --arg s "$since" '.last < $s' <<<"$batch")" = true ] && break
+  page=$((page + 1))
+done
+
+own_change() {
+  gh api "repos/$repo/compare/$1...$2" --jq '[.files[] | {f: .filename, sha, n: (.additions + .deletions),
+    lines: (if .patch then [.patch | split("\n")[] | select(test("^[-+]"))] else null end)}]' 2>/dev/null
+}
+
+pre_review_of() {
+  gh api --paginate "repos/$repo/issues/$1/comments" \
+    | jq -r -L "$lib" 'include "factory-stats"; .[] | select(.body | is_pre_review) | .body | @json' \
+    | tail -n 1 | jq -r '.' 2>/dev/null || true
+}
+
+rework_of() {
+  local row=$1 body=$2 pr head merge base agent final
+  pr=$(jq -r .number <<<"$row")
+  head=$(grep -oE '^agent-head: [0-9a-f]{40}$' <<<"$body" | tail -n 1 | cut -d' ' -f2 || true)
+  merge=$(jq -r .merge <<<"$row")
+  # main just before the merge: diffing from it keeps main's own changes out of rework (merge or squash, not rebase-merge)
+  if [ -n "$head" ] && base=$(gh api "repos/$repo/commits/$merge" --jq '.parents[0].sha' 2>/dev/null) \
+    && agent=$(own_change "$base" "$head") && final=$(own_change "$base" "$merge"); then
+    printf '%s\n%s\n' "$agent" "$final" | jq -cs -L "$lib" --argjson n "$pr" --arg h "$head" \
+      'include "factory-stats"; {number: $n, head: $h} + rework_diff(.[0]; .[1])'
+  else
+    jq -cn --argjson n "$pr" '{number: $n, head: null}'
+  fi
+}
+
+rework='[]'
+reviews='[]'
+for pr in $(jq -r '.[].number' <<<"$prs"); do
+  body=$(pre_review_of "$pr")
+  [ -n "$body" ] && reviews=$(jq -c --arg b "$body" '. + [$b]' <<<"$reviews")
+  row=$(jq -c --argjson n "$pr" '.[] | select(.number == $n)' <<<"$prs")
+  [ "$(jq -r .merged_at <<<"$row")" = null ] && continue
+  rework=$(jq -c --argjson r "$(rework_of "$row" "$body")" '. + [$r]' <<<"$rework")
+done
+
+# Files, not arguments: a month of pre-review bodies overflows the argument list
+jq -rn -L "$lib" --slurpfile prs <(echo "$prs") --slurpfile rework <(echo "$rework") \
+  --slurpfile reviews <(echo "$reviews") --arg since "$since" \
+  'include "factory-stats"; report($prs[0]; $rework[0]; $reviews[0]; $since)'
