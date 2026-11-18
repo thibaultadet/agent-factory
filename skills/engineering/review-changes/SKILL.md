@@ -13,7 +13,7 @@ Review the current git changes in this repository.
 Then provide a concise review focusing on:
 
 - **Correctness**: logical errors, edge cases, missing validations
-- **Consistency**: does the code follow patterns already established in the codebase (Rails conventions, Next.js patterns, French locale, etc.)
+- **Consistency**: does the code follow patterns already established in the codebase (framework conventions, locale, naming)
 - **Simplicity**: unnecessary complexity, premature abstractions, dead code
 - **Security**: auth checks, input validation, SQL injection, XSS risks
 - **Potential issues**: anything that could break in production

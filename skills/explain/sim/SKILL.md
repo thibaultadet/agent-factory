@@ -14,7 +14,7 @@ metadata:
 
 - 4 to 8 steps. Each step = one idea: title, ≤4 short sentences, optional code excerpt (≤10 lines) with its `file:line`.
 - Order: context → mechanics → scenarios → recap of the rules.
-- **Scenarios**: at least one step where the reader picks between 2–4 choices ("Le tuteur est désactivé", "Le rapport est déjà signé"…). Each choice reveals its consequence: what the code does, which branch, which `file:line`, what the user sees.
+- **Scenarios**: at least one step where the reader picks between 2–4 choices ("Le compte est désactivé", "La facture est déjà payée"…). Each choice reveals its consequence: what the code does, which branch, which `file:line`, what the user sees.
 - Every scenario mirrors a real branch in the code (an `if`, a policy rule, a state transition, a validation). Read it before writing it. No invented behaviour.
 - Mark wrong-intuition choices explicitly ("Piège : …") — they teach the most.
 - UI copy in the user's language.

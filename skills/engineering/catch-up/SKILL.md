@@ -11,7 +11,7 @@ The user cares about, in order:
 1. **Stay familiar with the architecture** — how the new/changed models, controllers, services, jobs, components work.
 2. **Attention points** — questionable business logic, edge cases, security/auth, migrations/data, breaking changes, perf/N+1, missing tests.
 
-Keep each turn short — fragment rather than dump a wall of text (see [[feedback_code_readability]]).
+Keep each turn short — fragment rather than dump a wall of text.
 
 ## Picking the explanation format
 
@@ -19,7 +19,7 @@ Both the global picture (step 3) and each zone (step 4) are explained with the `
 
 | Format | Skill | Pick when the subject is… |
 | --- | --- | --- |
-| Interactive HTML | `sim` | a **matrix**: behaviour varies along ≥2 axes (user type × status, paper × Beny case…), so "what happens if…" is the real question. |
+| Interactive HTML | `sim` | a **matrix**: behaviour varies along ≥2 axes (user role × status, draft × published…), so "what happens if…" is the real question. |
 | SVG diagram | `diagram` | a **pipeline**: ≥3 hops across components or layers (page → API client → controller → service → job), or a data relationship. |
 | STE text | `ste` | neither: one model/service, a validation, a refactor, independent zones. |
 
@@ -40,9 +40,9 @@ Diff empty or current branch is `main` → ask which ref to review. Issue refs i
 
 Group changed files by layer/domain (backend, frontend; skip tests, config, lockfiles, generated files). Order by importance, not `git`'s alphabetical order.
 
-Read the changed files when the diff isn't enough — never guess behaviour from a name (see [[feedback_read_ui_components]]). Lean on `docs/architecture.md`, `docs/backend.md`, `docs/frontend.md`, `GLOSSARY.md`.
+Read the changed files when the diff isn't enough: behaviour comes from the code, not from a name. Lean on the coding standards doc `docs/agents/factory.md` § Coding standards names, the stack docs it points to, and `GLOSSARY.md` when the project has one.
 
-**Explore beyond the diff.** The diff shows _what changed_, not _what it relies on_ — that's where real risks hide. Open what the diff calls: the Rails action a new API client hits (authorization, params, side effects), callers and callees of a changed method. Can't access a file you need → say so ("controller not read"), don't guess.
+**Explore beyond the diff.** The diff shows _what changed_, not _what it relies on_ — that's where real risks hide. Open what the diff calls: the endpoint a new API client hits (authorization, params, side effects), callers and callees of a changed method. Can't access a file you need → say so ("controller not read"), don't guess.
 
 Decide the **zone order**: biggest architectural impact first, trivial last. A zone is a coherent unit (model + its service, controller + serializer, one front feature), not one file.
 
@@ -60,7 +60,7 @@ Stay high-level: no `file:line`, no attention points, no inner mechanics. Stop: 
 
 ### 4. Walkthrough — one zone per turn
 
-- **How it works** — in the picked format: what the model/controller/service does, how it fits the existing architecture, which Rails/Next conventions it follows.
+- **How it works** — in the picked format: what the model/controller/service does, how it fits the existing architecture, which framework conventions it follows.
 - **Attention points — always as text in chat** (they need clickable `file:line`). **Verified, never speculated**: only what you confirmed by reading the code. Each: _where_ (file:line), _why_ a human eye helps, the concrete _risk_. Tag: `🔴 business` · `🔒 security/auth` · `🗃️ migration/data` · `💥 breaking` · `⚡ perf/N+1` · `🧪 tests` or other fitting tag.
 - **Don't manufacture risk.** No point in a zone → say so in one line. Can't name the concrete failure → drop it.
 - **Unverified = question**, not finding ("worth confirming the controller authorizes X").
