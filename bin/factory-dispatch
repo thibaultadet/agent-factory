@@ -1,0 +1,158 @@
+#!/bin/bash
+# Starts one cloud "implement issue" routine run per issue an agent can start now.
+#
+#   factory-dispatch              fire every eligible issue
+#   factory-dispatch --dry-run    list them, fire nothing, and say why each other issue waits
+#   factory-dispatch --stack      also fire issues whose blockers all sit in open PRs, stacked on them
+#   factory-dispatch --max=N      fire at most N eligible issues (default 5, caps concurrent runs and PRs to review)
+#   factory-dispatch 1534 [...]   fire these issues, eligible or not (the routine's gate still checks),
+#                             stacked on their blockers' open PR when they have one
+#
+# Eligible: open, labelled ready-for-agent, unassigned, not a PRD, every blocker closed,
+# no open PR that closes it. Firing assigns the issue to you, so a second dispatch skips it.
+# Stackable: every open blocker is closed by an open PR of one stack (a PR and the PRs it is
+# based on, down to main). The run branches off the top of that stack and opens its PR into it;
+# when that PR merges, GitHub deletes its branch and retargets the stacked PR to its own base.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+ENV_FILE=.claude/factory.env
+[ -f "$ENV_FILE" ] && source "$ENV_FILE"
+: "${FACTORY_ROUTINE_URL:?Set FACTORY_ROUTINE_URL in $ENV_FILE (see $ENV_FILE.example)}"
+: "${FACTORY_ROUTINE_TOKEN:?Set FACTORY_ROUTINE_TOKEN in $ENV_FILE (see $ENV_FILE.example)}"
+
+dry_run=false
+stack=false
+max=5
+issues=()
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run) dry_run=true ;;
+    --stack) stack=true ;;
+    --max=*)
+      max=${arg#--max=}
+      case "$max" in *[!0-9]* | "" | 0) echo "--max takes a positive integer" >&2; exit 2 ;; esac ;;
+    *[!0-9]* | "") echo "Unknown argument: $arg" >&2; exit 2 ;;
+    *) issues+=("$arg") ;;
+  esac
+done
+
+# One line per open PR: number, head branch, base branch, space-separated issues it closes.
+PRS=$(gh api "repos/{owner}/{repo}/pulls?state=open&per_page=100" --paginate --jq '.[] |
+  [.number, .head.ref, .base.ref,
+   ([(.body // "") | scan("(?i)(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?) #([0-9]+)") | .[0]] | join(" "))] | @tsv')
+
+open_blockers() {
+  local number=$1 native body_refs
+  native=$(gh api "repos/{owner}/{repo}/issues/$number/dependencies/blocked_by" \
+    --jq '.[] | select(.state == "open") | .number')
+  body_refs=$(gh issue view "$number" --json body --jq .body |
+    awk '/^##+ *[Bb]locked [Bb]y/ { inside = 1; next } /^##/ { inside = 0 } inside' |
+    grep -oE '#[0-9]+' | tr -d '#' || true)
+  for ref in $body_refs; do
+    [ "$(gh issue view "$ref" --json state --jq .state)" = "OPEN" ] && native+=$'\n'"$ref"
+  done
+  echo "$native" | sort -un | grep . || true
+}
+
+# Open PRs that close issue $1, as "number<TAB>head".
+prs_closing() {
+  awk -F'\t' -v issue="$1" '(" " $4 " ") ~ (" " issue " ") { print $1 "\t" $2 }' <<<"$PRS"
+}
+
+# Issues closed by the open PR on branch $1 and by every open PR it is stacked on.
+stack_closes() {
+  local head=$1 line
+  while line=$(awk -F'\t' -v head="$head" '$2 == head { print; exit }' <<<"$PRS") && [ -n "$line" ]; do
+    cut -f4 <<<"$line" | tr ' ' '\n'
+    head=$(cut -f3 <<<"$line")
+  done | grep . || true
+}
+
+# Head branch of the open PR stack that closes every blocker in $1, if any.
+stack_parent() {
+  local blockers=$1 blocker head
+  for blocker in $blockers; do
+    for head in $(prs_closing "$blocker" | cut -f2); do
+      if [ -z "$(comm -23 <(sort -u <<<"$blockers") <(stack_closes "$head" | sort -u))" ]; then
+        echo "$head"
+        return
+      fi
+    done
+  done
+}
+
+# "#12 (PR #40)" for a blocker an open PR closes, "#12" otherwise.
+describe_blockers() {
+  local blocker pr
+  for blocker in $1; do
+    pr=$(prs_closing "$blocker" | head -1 | cut -f1)
+    echo "#$blocker${pr:+ (PR #$pr)}"
+  done | paste -sd ' ' -
+}
+
+# Eligible issues, one per line: the number, then the parent branch to stack on when there is one.
+eligible_issues() {
+  local claimed number blockers parent
+  claimed=$(cut -f4 <<<"$PRS" | tr ' ' '\n' | grep . | sort -u || true)
+  gh issue list --state open --label ready-for-agent --limit 100 \
+    --json number,assignees,labels \
+    --jq '.[] | select((.assignees | length) == 0) | select([.labels[].name] | index("PRD") | not) | .number' |
+  while read -r number; do
+    if grep -qx "$number" <<<"$claimed"; then
+      echo "  skip #$number: PR already open" >&2
+      continue
+    fi
+    blockers=$(open_blockers "$number")
+    parent=""
+    if [ -n "$blockers" ]; then
+      parent=$(stack_parent "$blockers")
+      if [ -z "$parent" ]; then
+        echo "  skip #$number: blocked by $(describe_blockers "$blockers")" >&2
+        continue
+      fi
+      if ! $stack; then
+        echo "  skip #$number: blocked by $(describe_blockers "$blockers"), stackable on $parent with --stack" >&2
+        continue
+      fi
+    fi
+    echo "$number${parent:+ $parent}"
+  done
+}
+
+fire() {
+  local text=$1
+  curl --silent --show-error --fail-with-body -X POST "$FACTORY_ROUTINE_URL" \
+    -H "Authorization: Bearer $FACTORY_ROUTINE_TOKEN" \
+    -H "anthropic-beta: experimental-cc-routine-2026-04-01" \
+    -H "anthropic-version: 2023-06-01" \
+    -H "Content-Type: application/json" \
+    -d "$(jq -n --arg text "$text" '{text: $text}')" | jq -r '.claude_code_session_url'
+}
+
+runs=()
+if [ ${#issues[@]} -eq 0 ]; then
+  while read -r run; do runs+=("$run"); done < <(eligible_issues | head -n "$max")
+else
+  for number in "${issues[@]}"; do
+    blockers=$(open_blockers "$number")
+    parent=$([ -n "$blockers" ] && stack_parent "$blockers" || true)
+    runs+=("$number${parent:+ $parent}")
+  done
+fi
+
+if [ ${#runs[@]} -eq 0 ]; then
+  echo "No eligible issue."
+  exit 0
+fi
+
+for run in "${runs[@]}"; do
+  read -r number parent <<<"$run"
+  if $dry_run; then
+    echo "#$number would fire${parent:+ on $parent}"
+    continue
+  fi
+  session_url=$(fire "$run")
+  gh issue edit "$number" --add-assignee @me >/dev/null
+  echo "#$number${parent:+ on $parent} -> $session_url"
+done

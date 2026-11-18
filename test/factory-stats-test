@@ -1,0 +1,89 @@
+#!/bin/bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+failures=0
+check() { # <name> <expected rows JSON> <pre-review body>
+  local got
+  got=$(jq -cn -L bin/lib --arg b "$3" 'include "factory-stats"; tally_one($b).rows')
+  if [ "$got" = "$2" ]; then echo "ok   $1"; else echo "FAIL $1: got $got, want $2"; failures=$((failures + 1)); fi
+}
+
+head='agent-head: 0123456789012345678901234567890123456789'
+
+check "new shape counts per reviewer" \
+  '[{"who":"bugs","certain":3,"dismissed":0,"open":1,"fixed":2},{"who":"spec","certain":1,"dismissed":1,"open":0,"fixed":0}]' \
+  "1. 🔴 bugs · \`a.rb:1\` — x _(certain)_
+2. ⚪ spec · \`b.rb:2\` — y, dismissed: intended _(certain)_
+3. 🔴 bugs · \`c.rb:3\` — z _(to confirm)_
+
+$head
+
+<details><summary>Rounds</summary>
+- review 1 · bugs → opus/medium → 3 certain
+- review 1 · spec → sonnet/medium → 1 certain
+</details>"
+
+check "no agent-head adds nothing" '[]' \
+  "1. 🔴 bugs · \`a.rb:1\` — x _(certain)_
+
+<details>
+- review 1 · bugs → opus/medium → 3 certain
+</details>"
+
+check "open point re-reported over 3 passes is not fixed" \
+  '[{"who":"bugs","certain":3,"dismissed":0,"open":1,"fixed":0}]' \
+  "1. 🔴 bugs · \`a.rb:1\` — x _(certain)_
+
+$head
+
+<details>
+- review 1 · bugs → opus/medium → 1 certain
+- review 2 · bugs → opus/medium → 1 certain
+- review 3 · bugs → opus/medium → 1 certain
+</details>"
+
+check "dismissed point is not re-reported on later passes" \
+  '[{"who":"bugs","certain":3,"dismissed":1,"open":0,"fixed":2}]' \
+  "1. ⚪ bugs · \`a.rb:1\` — x, dismissed: intended _(certain)_
+
+$head
+
+<details>
+- review 1 · bugs → opus/medium → 3 certain
+- review 2 · bugs → opus/medium → nothing
+- review 3 · bugs → opus/medium → nothing
+</details>"
+
+check "point re-reported then dismissed is not fixed" \
+  '[{"who":"bugs","certain":2,"dismissed":1,"open":0,"fixed":0}]' \
+  "1. ⚪ bugs · \`a.rb:1\` — x, dismissed: intended _(certain)_
+
+$head
+
+<details>
+- review 1 · bugs → opus/medium → 1 certain
+- review 2 · bugs → opus/medium → 1 certain
+- review 3 · bugs → opus/medium → nothing
+</details>"
+
+check "unnamed point skips the pre-review" '[]' \
+  "1. 🔴 \`a.rb:1\` — x _(certain)_
+
+$head
+
+<details>
+- review 1 · bugs → opus/medium → 3 certain
+</details>"
+
+marker_check() { # <name> <marker> <expected>
+  local got
+  got=$(jq -rn -L bin/lib --arg m "$2" 'include "factory-stats"; "x\n\($m)\n## Pre-review" | is_pre_review')
+  if [ "$got" = "$3" ]; then echo "ok   $1"; else echo "FAIL $1: got $got, want $3"; failures=$((failures + 1)); fi
+}
+marker_check "current marker is a pre-review" "<!-- pre-review -->" true
+marker_check "legacy marker is still a pre-review" "<!-- sandcastle-pr-check -->" true
+got=$(jq -rn -L bin/lib 'include "factory-stats"; "a maintainer comment" | is_pre_review')
+if [ "$got" = false ]; then echo "ok   plain comment is not a pre-review"; else echo "FAIL plain comment: got $got"; failures=$((failures + 1)); fi
+
+[ "$failures" -eq 0 ]

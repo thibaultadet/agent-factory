@@ -21,6 +21,22 @@ claude plugin install explain@thibaultadet
 
 ### Factory (`factory`)
 
+Requires the [`mattpocock-skills`](https://github.com/mattpocock/skills) plugin (`tdd`, `grilling`, `improve-codebase-architecture`).
+
+Routines, skills a cloud routine's prompt names (« Run the `factory:implement-issue` skill. »):
+
+- **implement-issue** — gate one issue, then build → polish → review → fix until clean, and open a draft PR with its pre-review.
+- **improve-codebase** — pick, design and build the best architecture improvement, unattended.
+- **cloud-retro** — turn the maintainer's rework of agent PRs into harness-fix issues.
+
+Scripts, on Claude's `PATH` while the plugin is enabled (`bin/`):
+
+- **factory-dispatch** — fire one `implement-issue` run per issue an agent can start now (`--dry-run`, `--stack`, `--max=N`). Reads `FACTORY_ROUTINE_URL` and `FACTORY_ROUTINE_TOKEN` from the project's `.claude/factory.env`; add that path to the project's `.gitignore`.
+- **issue-brief** — an issue as an agent may read it: body plus the owner's comments only.
+- **factory-stats** — merge rate, rework and findings per reviewer of the agent PRs (`--since=YYYY-MM-DD`).
+
+The routines read the project's `docs/agents/factory.md` (feedback loops, coding standards, verification, reviewer triggers, pre-review lists).
+
 Reviewers, read-only subagents each covering one lens of a branch, dispatched as `factory:<name>`:
 
 - **bugs** — business bugs, crashes, breaking changes, missing tests.

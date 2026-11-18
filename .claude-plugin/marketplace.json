@@ -9,12 +9,15 @@
     {
       "name": "factory",
       "source": "./",
-      "description": "Agent factory: specialist branch reviewers; clean, push and open the PR of an agent-built branch.",
+      "description": "Agent factory: cloud routines from issue to draft PR, specialist branch reviewers, dispatch and stats scripts, and push-pr.",
       "category": "engineering",
       "strict": false,
       "skills": [
         "./skills/engineering/push-pr",
-        "./skills/factory/pre-review"
+        "./skills/factory/pre-review",
+        "./skills/factory/implement-issue",
+        "./skills/factory/improve-codebase",
+        "./skills/factory/cloud-retro"
       ],
       "agents": [
         "./reviewers/bugs.md",
