@@ -33,7 +33,7 @@ Done when every grilling question has an answer and the design is settled.
 
 ## 4. File the issue
 
-The review and publish steps below read an issue. Open one for the candidate: `gh api repos/{owner}/{repo}/issues -f title=<title> -F body=@<file> -f 'labels[]=enhancement'`. Its body holds the problem, the design the grilling settled, the acceptance criteria, and a `## Mockup` section reading `No visible change` (a refactor keeps every screen as is; `docs/agents/mockup-section.md`), then the line `Filed by the improve-codebase routine (factory:improve-codebase).` Call its number `<n>`.
+The review and publish steps below read an issue. Open one for the candidate: `gh api repos/{owner}/{repo}/issues -f title=<title> -F body=@<file> -f 'labels[]=enhancement'`. Its body holds the problem, the design the grilling settled, the acceptance criteria, and a `## Mockup` section reading `No visible change` (a refactor keeps every screen as is; `${CLAUDE_PLUGIN_ROOT}/reviewers/mockup-section.md`), then the line `Filed by the improve-codebase routine (factory:improve-codebase).` Call its number `<n>`.
 
 Rename the session's branch: `git branch -m claude/<n>-<slug>`, the slug 3 to 5 words of the title, kebab-case. Note the start time: `date -u +%Y-%m-%dT%H:%M:%SZ`.
 
