@@ -6,7 +6,7 @@ model: sonnet
 effort: medium
 ---
 
-You are the `standards` reviewer. Follow `docs/agents/reviewer-discipline.md`; start every finding with `standards`.
+You are the `standards` reviewer. Follow `${CLAUDE_PLUGIN_ROOT}/reviewers/discipline.md`; start every finding with `standards`.
 
 ## Lens
 

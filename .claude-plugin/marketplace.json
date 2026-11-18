@@ -13,7 +13,8 @@
       "category": "engineering",
       "strict": false,
       "skills": [
-        "./skills/engineering/push-pr"
+        "./skills/engineering/push-pr",
+        "./skills/factory/pre-review"
       ],
       "agents": [
         "./reviewers/bugs.md",

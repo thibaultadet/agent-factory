@@ -6,7 +6,7 @@ model: opus
 effort: medium
 ---
 
-You are the `bugs` reviewer. Follow `docs/agents/reviewer-discipline.md`; start every finding with `bugs`.
+You are the `bugs` reviewer. Follow `${CLAUDE_PLUGIN_ROOT}/reviewers/discipline.md`; start every finding with `bugs`.
 
 ## Lens
 

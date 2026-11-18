@@ -6,7 +6,7 @@ model: sonnet
 effort: medium
 ---
 
-You are the `perf` reviewer. Follow `docs/agents/reviewer-discipline.md`; start every finding with `perf`.
+You are the `perf` reviewer. Follow `${CLAUDE_PLUGIN_ROOT}/reviewers/discipline.md`; start every finding with `perf`.
 
 ## Lens
 
