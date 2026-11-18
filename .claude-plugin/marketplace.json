@@ -9,11 +9,20 @@
     {
       "name": "factory",
       "source": "./",
-      "description": "Agent factory: clean, push and open the PR of an agent-built branch.",
+      "description": "Agent factory: specialist branch reviewers; clean, push and open the PR of an agent-built branch.",
       "category": "engineering",
       "strict": false,
       "skills": [
         "./skills/engineering/push-pr"
+      ],
+      "agents": [
+        "./reviewers/bugs.md",
+        "./reviewers/data.md",
+        "./reviewers/mockup.md",
+        "./reviewers/perf.md",
+        "./reviewers/security.md",
+        "./reviewers/spec.md",
+        "./reviewers/standards.md"
       ]
     },
     {
