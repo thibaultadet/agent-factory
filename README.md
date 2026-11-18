@@ -28,6 +28,8 @@ Three plugins, one marketplace:
 
 ## Install
 
+The factory works on a GitHub repo: its routines read and write issues and PRs through `gh`, and its scripts read the `origin` remote. Have the project on GitHub with `origin` set, and `gh`, `jq` and `curl` installed.
+
 ### 1. Plugins
 
 ```sh
@@ -51,14 +53,26 @@ Skills only, any agent: `npx skills add thibaultadet/agent-factory`.
 In the project the factory works on:
 
 1. Run `/setup-matt-pocock-skills`. It writes `docs/agents/issue-tracker.md` and `docs/agents/triage-labels.md`, and the labels the factory reads (`ready-for-agent`, `needs-triage`).
-2. Create the labels the factory adds: `quick`, `PRD`, `retro`.
-3. Write `docs/agents/factory.md`, at least its § Feedback loops (see [Per-project config](#per-project-config)).
-4. Optional: one `docs/agents/checklists/<reviewer>.md` per reviewer that needs your project's facts.
+2. Create the labels the factory adds:
+   ```sh
+   gh label create quick --description "Small fix sent straight to an agent, no triage"
+   gh label create PRD --description "Parent issue the factory never builds itself"
+   gh label create retro --description "Harness fix proposed by cloud-retro"
+   ```
+3. Write `docs/agents/factory.md`, at least its § Feedback loops. Start from [`docs/examples/factory.md`](docs/examples/factory.md): keep its headings, the factory finds each section by name. See [Per-project config](#per-project-config).
+4. Optional: one `docs/agents/checklists/<reviewer>.md` per reviewer that needs your project's facts, e.g. [`security`](docs/examples/checklists/security.md), [`mockup`](docs/examples/checklists/mockup.md).
 5. Commit and push: the cloud routine reads the project from GitHub.
 
 ### 3. Cloud routines
 
-On [claude.ai/code](https://claude.ai/code), create a cloud environment for the repo with the plugins of step 1 installed, then one routine per entry:
+On [claude.ai/code](https://claude.ai/code), create a cloud environment for the repo. Its setup script installs the plugins, plus whatever your feedback loops need (language runtimes, a browser for the verification skill):
+
+```sh
+claude plugin marketplace add mattpocock/skills && claude plugin install mattpocock-skills@mattpocock
+claude plugin marketplace add thibaultadet/agent-factory && for plugin in factory engineering explain; do claude plugin install "$plugin@thibaultadet"; done
+```
+
+Then create one routine per entry, on that environment:
 
 | Routine | Trigger | Prompt |
 |---|---|---|
@@ -68,21 +82,21 @@ On [claude.ai/code](https://claude.ai/code), create a cloud environment for the 
 
 ### 4. Dispatch
 
-Copy the implement-issue routine's API URL and token into the project's `.claude/factory.env`, and add that path to `.gitignore`:
+The implement-issue routine's page on the web UI shows its API trigger URL and token. Copy both into the project's `.claude/factory.env`, and add that path to `.gitignore`:
 
 ```sh
 FACTORY_ROUTINE_URL=https://…
 FACTORY_ROUTINE_TOKEN=…
 ```
 
-Then, from the project:
+Then, in a Claude Code session in the project (the plugin puts `bin/` on Claude's `PATH`, not your shell's):
 
 ```sh
-factory-dispatch --dry-run   # which issues would start, and why the others skip
-factory-dispatch             # one run per eligible issue
+! factory-dispatch --dry-run   # which issues would start, and why the others skip; needs no token
+! factory-dispatch             # one run per eligible issue
 ```
 
-An issue is eligible when it is open, labelled `ready-for-agent` (or `quick`) by the repo owner, unassigned, not a `PRD`, and its blockers are closed. `--stack` also starts an issue whose only open blocker has an open PR, stacked on that PR.
+An issue is eligible when it is open, labelled `ready-for-agent`, unassigned, not a `PRD`, and its blockers are closed. `--stack` also starts an issue whose only open blocker has an open PR, stacked on that PR.
 
 ## Per-project config
 
