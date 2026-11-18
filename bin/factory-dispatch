@@ -5,7 +5,7 @@
 #   factory-dispatch --dry-run    list them, fire nothing, and say why each other issue waits
 #   factory-dispatch --stack      also fire issues whose blockers all sit in open PRs, stacked on them
 #   factory-dispatch --max=N      fire at most N eligible issues (default 5, caps concurrent runs and PRs to review)
-#   factory-dispatch 1534 [...]   fire these issues, eligible or not (the routine's gate still checks),
+#   factory-dispatch 42 [...]     fire these issues, eligible or not (the routine's gate still checks),
 #                             stacked on their blockers' open PR when they have one
 #
 # Eligible: open, labelled ready-for-agent, unassigned, not a PRD, every blocker closed,
@@ -18,8 +18,6 @@ cd "$(git rev-parse --show-toplevel)"
 
 ENV_FILE=.claude/factory.env
 [ -f "$ENV_FILE" ] && source "$ENV_FILE"
-: "${FACTORY_ROUTINE_URL:?Set FACTORY_ROUTINE_URL in $ENV_FILE (see the README, Install § 4)}"
-: "${FACTORY_ROUTINE_TOKEN:?Set FACTORY_ROUTINE_TOKEN in $ENV_FILE (see the README, Install § 4)}"
 
 dry_run=false
 stack=false
@@ -36,6 +34,11 @@ for arg in "$@"; do
     *) issues+=("$arg") ;;
   esac
 done
+
+if ! $dry_run; then
+  : "${FACTORY_ROUTINE_URL:?Set FACTORY_ROUTINE_URL in $ENV_FILE (see the README, Install § 4)}"
+  : "${FACTORY_ROUTINE_TOKEN:?Set FACTORY_ROUTINE_TOKEN in $ENV_FILE (see the README, Install § 4)}"
+fi
 
 # One line per open PR: number, head branch, base branch, space-separated issues it closes.
 PRS=$(gh api "repos/{owner}/{repo}/pulls?state=open&per_page=100" --paginate --jq '.[] |
