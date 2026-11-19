@@ -20,7 +20,7 @@ Every agent, you included, reads the issue through `issue-brief <n>`: its body p
 
 The session works on the branch it was given (`claude/…`); every agent stays on it. `gh` GraphQL commands (`gh pr list`, `gh pr create`) are blocked here: reach pull requests through `gh api` (REST).
 
-**You publish, the owner merges.** Your writes to GitHub end at the draft PR and its pre-review comment (§ 4).
+**You publish, the owner merges.** Your writes to GitHub end at the draft PR, its labels and its pre-review comment (§ 4).
 
 ## 1. Gate
 
@@ -73,23 +73,23 @@ Done when a review pass leaves nothing to fix, or the confirmer returned. Start 
 
 ## 4. Publish
 
-1. `git status` is clean and `git log origin/<parent>..HEAD` is non-empty; otherwise comment on the issue that the run produced nothing, and stop.
-2. Run the publish-evidence command of `docs/agents/factory.md` § Verification with `{issue}` = `<n>`, `{since}` = the start time, `{out}` = the evidence file (no such section → the evidence file stays empty). The evidence file reaches the comment byte for byte, through the shell: this session defangs image links in Markdown that passes through you, and a defanged screenshot shows as a broken link.
-3. Write the **pre-review**, in English. It holds:
+1. **Comment pass**: bug and closing rounds commit after the last polish, so their comments reach the PR unchecked. List every comment the branch adds with the added-comments command of `docs/agents/factory.md` § Coding standards, `{base}` = `origin/<parent>` (none named → `factory-added-comments origin/<parent>`). Hits → dispatch the polisher: « Do only this task. Hold each comment line below against the comment rule of the coding standards doc of `docs/agents/factory.md` § Coding standards. A comment that restates the code, a commit message or a ticket, or heads a module, class or method, goes: delete it, or rename the code it explains. Keep one only when it names the exception of the rule it meets. Rerun the feedback loops for the areas you touched. Fold each removal into the commit that added the comment (`git log -S '<text>' origin/<parent>..HEAD`): `git commit --fixup=<sha>` per commit, then `GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash origin/<parent>`; the branch gains no commit. Report each line as removed, or kept with its exception. » followed by the list. Done when every listed line is removed or kept with its exception, and `git log origin/<parent>..HEAD` holds the same number of commits as before.
+2. `git status` is clean and `git log origin/<parent>..HEAD` is non-empty; otherwise comment on the issue that the run produced nothing, and stop.
+3. Run the publish-evidence command of `docs/agents/factory.md` § Verification with `{issue}` = `<n>`, `{since}` = the start time, `{out}` = the evidence file (no such section → the evidence file stays empty). The evidence file reaches the comment byte for byte, through the shell: this session defangs image links in Markdown that passes through you, and a defanged screenshot shows as a broken link.
+4. Write the **pre-review**, in English. It holds:
    - its **points**: the ledger's entries `open` or `dismissed`, plus each reviewer's kept `(to confirm)` points, each naming its reviewer (the first, when several raised it), shaped and given a 🟢/🟡/🔴 verdict by the `factory:pre-review` skill (with the deny-list it reads from the config);
    - a `Factory:` line naming each factory path the diff touches (its § Factory paths; no match, no line);
    - its `agent-head:` line, left empty;
    - the evidence, byte for byte: `{ printf '<details><summary>Evidence</summary>\n\n'; cat <evidence file>; printf '\n</details>\n\n'; } >> <pre-review file>` (nothing when the evidence file is empty);
    - on its *Manual* line, each `docs/agents/factory.md` section noted missing in § 1, as `<section> missing: <step> skipped`;
    - an appended `<details><summary>Rounds</summary>…</details>` log: one line per agent you dispatched, in order, every reviewer of a pass on its own line, `step · role → model/effort → outcome`, a reviewer's model/effort written `plugin` since its plugin frontmatter sets it (`review 2 · security → plugin → 1 certain`, `review 2 · spec → plugin → nothing`, `confirm · confirmer → sonnet/medium → 3 fixed, 1 open`).
-4. Call the Skill tool with `factory:push-pr` and run its steps 3 and 4 only, with these cloud overrides:
-   - No human is here: apply the target history without waiting for a go. Read `main` as `origin/<parent>`. The rewrite starts from `git merge-base origin/<parent> HEAD`, the commit this run branched from: the run's tree predates any later merge on `<parent>`, so committing it on `origin/<parent>`'s tip reverts that merge.
-   - Its `pr` skill is `mattpocock-skills:pr`: call it before writing a line of the body.
-   - Its pre-review is the one from step 3 above, which is the single source of its points and their verdicts: `open` → 🔴, `dismissed` → ⚪ with its reason, `(to confirm)` → 🔴 still open, keeping its `_(to confirm)_` mark: no agent settled it, so it is neither addressed nor shown false. Every numbered point gets one of these, none other.
-   - Title: `[mockup unverified] [unresolved] type(scope): summary`, each prefix only when § 3 says so, in that order.
-   - Evidence lists the feedback loops that ran and their result: CI skips draft PRs, so this is the only test record. It links to the pre-review comment for the screenshots. End the body with `Closes #<n>`, and `Parent PRD: #<p>` when the issue is a sub-issue of a PRD. On a stack, open the body with `Stacked on #<parent PR>: merge it first.`
-5. `git push --force-with-lease -u origin HEAD`.
-6. Create the **draft** PR into `<parent>`: `gh api repos/{owner}/{repo}/pulls -f base=<parent> -f head=<branch> -f title=<title> -F draft=true -F body=@<body file>`.
-7. Fill the pre-review's `agent-head:` line (edit that line in place, so the evidence stays byte for byte) with `gh api repos/{owner}/{repo}/pulls/<pr> --jq .head.sha`, set its verdict per the `factory:pre-review` skill § Verdict now that the loops and evidence are known, then post it on the PR: `gh api repos/{owner}/{repo}/issues/<pr>/comments -F body=@<file>`.
+5. Write the PR, in English. Call the Skill tool with `mattpocock-skills:pr` before writing a line of the body.
+   - **Title**: `[mockup unverified] [unresolved] #<n> <summary>`, each prefix only when § 3 says so, in that order; the summary imperative, under 70 characters (`#1998 Let a Guardian pay Beny+ yearly`).
+   - **Body**: per the `pr` skill. On a stack, open it with `Stacked on #<parent PR>: merge it first.` Evidence lists the feedback loops that ran and their result: CI skips draft PRs, so this is the only test record. It links to the pre-review comment for the screenshots. Add the `## Decisions` and `## Visible changes` sections of § 2, then a `## Pre-review` section: every point of the step-4 pre-review, numbered as there, with its verdict: `open` → 🔴, `dismissed` → ⚪ with its reason, `(to confirm)` → 🔴 still open, keeping its `_(to confirm)_` mark. End with `Closes #<n>`, `Parent PRD: #<p>` when the issue is a sub-issue of a PRD, then `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
+   - Write the body to a file (`mktemp`), so Mermaid and code blocks reach GitHub intact.
+6. `git push --force-with-lease -u origin HEAD`.
+7. Create the **draft** PR into `<parent>`: `gh api repos/{owner}/{repo}/pulls -f base=<parent> -f head=<branch> -f title=<title> -F draft=true -F body=@<body file>`.
+8. Label it `factory`, which marks every PR the factory opens. Create the label when missing: `gh api repos/{owner}/{repo}/labels/factory` failing → `gh api repos/{owner}/{repo}/labels -f name=factory -f color=5319e7 -f description="Opened by a factory routine"`. Then `gh api repos/{owner}/{repo}/issues/<pr>/labels -f 'labels[]=factory'`. A `quick` issue's PR also gets `factory:quick`, which marks a run whose open questions the agent settled alone (create it the same way, color `fbca04`, description `Fast-lane run: the agent took the DECISIONs`).
+9. Fill the pre-review's `agent-head:` line (edit that line in place, so the evidence stays byte for byte) with `gh api repos/{owner}/{repo}/pulls/<pr> --jq .head.sha`, set its verdict per the `factory:pre-review` skill § Verdict now that the loops and evidence are known, then post it on the PR: `gh api repos/{owner}/{repo}/issues/<pr>/comments -F body=@<file>`.
 
 Done when the PR URL is printed. Leave the issue open: the merge closes it.

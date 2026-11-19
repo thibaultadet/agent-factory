@@ -107,7 +107,7 @@ Every project file the plugins read. All are optional except § Feedback loops: 
 | Section | Read by | Holds |
 |---|---|---|
 | § Feedback loops | builder, fixers, `improve-codebase`, `cloud-retro`, `take-over-pr` | One row per area: path, lint command, test command. **Required**: without it `implement-issue` stops. |
-| § Coding standards | builder, polisher, `standards` reviewer, `improve-codebase`, `push-pr`, `catch-up`, `take-over-pr` | The coding standards doc, and the stack doc it points to per area. |
+| § Coding standards | builder, polisher, `standards` reviewer, `implement-issue`, `improve-codebase`, `push-pr`, `catch-up`, `take-over-pr` | The coding standards doc, and the stack doc it points to per area. Optionally the added-comments command the comment pass runs (default: `factory-added-comments`). |
 | § Verification | gate, builder, `mockup` reviewer, pre-review | The verification skill (and its mockup comparison), what counts as a user-visible change, the launch command, the publish-evidence command, the evidence folder. |
 | § Reviewer triggers | `implement-issue` | Which diff paths start the conditional reviewers (`mockup`, `data`, `security`, `perf`). `spec`, `bugs`, `standards` always run. |
 | § Pre-review › Sensitive deny-list | `pre-review` | Paths that make the verdict 🔴 (auth, migrations, billing, lockfiles…). |
@@ -131,7 +131,7 @@ An issue that changes a screen carries a `## Mockup` section in its body. The co
 
 Routines, run by a cloud routine whose prompt names them:
 
-- **implement-issue** — gate one issue, then build → polish → review → fix until clean, and open a draft PR with its pre-review.
+- **implement-issue** — gate one issue, then build → polish → review → fix until clean, open a draft PR labelled `factory` with its pre-review.
 - **improve-codebase** — pick, design and build the best architecture improvement, unattended.
 - **cloud-retro** — turn the maintainer's rework of agent PRs into harness-fix issues.
 
@@ -149,6 +149,7 @@ Scripts, on Claude's `PATH` while the plugin is enabled (`bin/`):
 
 - **factory-dispatch** — fire one `implement-issue` run per issue an agent can start now (`--dry-run`, `--stack`, `--max=N`).
 - **issue-brief** — an issue as an agent may read it: body plus the owner's comments only.
+- **factory-added-comments** — the comment lines a branch adds (`file:line: text`), for projects that name no added-comments command.
 - **factory-stats** — merge rate, rework and findings per reviewer of the agent PRs (`--since=YYYY-MM-DD`).
 
 Skills:

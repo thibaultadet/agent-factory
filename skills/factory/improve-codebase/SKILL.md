@@ -43,6 +43,6 @@ Done when the issue exists, its number is known and the branch carries it.
 
 Follow `${CLAUDE_PLUGIN_ROOT}/skills/factory/implement-issue/SKILL.md` from § 2 to the end for issue `<n>`, parent `main`. Its builder builds with the `tdd` skill through `implement.md`; the build is done when the new tests are green and the existing test suite of every touched area of `docs/agents/factory.md` § Feedback loops passes. Its § 1 does not apply: this routine filed the issue and ran the config check in this routine's § 1. The missing sections noted there go on the *Manual* line of `implement-issue.md` § 4.
 
-One addition to its § 4: the PR body opens with `Opened by the improve-codebase routine (factory:improve-codebase).`
+Two additions to its § 4: the PR body opens with `Opened by the improve-codebase routine (factory:improve-codebase).`, and the PR also gets the `factory:improve` label, which marks the improvements no one asked for (create it like `factory`, color `0e8a16`, description `Opened by the improve-codebase routine`).
 
 Done when the PR URL is printed.
