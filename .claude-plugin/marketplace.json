@@ -15,6 +15,7 @@
       "skills": [
         "./skills/engineering/push-pr",
         "./skills/factory/pre-review",
+        "./skills/factory/dispatch",
         "./skills/factory/implement-issue",
         "./skills/factory/improve-codebase",
         "./skills/factory/cloud-retro"

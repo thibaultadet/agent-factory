@@ -153,6 +153,7 @@ Scripts, on Claude's `PATH` while the plugin is enabled (`bin/`):
 
 Skills:
 
+- **dispatch** — dry-run `factory-dispatch`, show which issues would start, fire them on your go and list their session URLs.
 - **pre-review** — verdict, shape and `agent-head` of the pre-review comment an agent posts on its PR.
 - **push-pr** — clean the commits, check the pre-review points, push the branch and open (or update) a PR with a body from the `pr` skill.
 
