@@ -89,7 +89,7 @@ Done when a review pass leaves nothing to fix, or the confirmer returned. Start 
    - Write the body to a file (`mktemp`), so Mermaid and code blocks reach GitHub intact.
 6. `git push --force-with-lease -u origin HEAD`.
 7. Create the **draft** PR into `<parent>`: `gh api repos/{owner}/{repo}/pulls -f base=<parent> -f head=<branch> -f title=<title> -F draft=true -F body=@<body file>`.
-8. Label it `factory`, which marks every PR the factory opens. Create the label when missing: `gh api repos/{owner}/{repo}/labels/factory` failing → `gh api repos/{owner}/{repo}/labels -f name=factory -f color=5319e7 -f description="Opened by a factory routine"`. Then `gh api repos/{owner}/{repo}/issues/<pr>/labels -f 'labels[]=factory'`.
+8. Label it `factory`, which marks every PR the factory opens. Create the label when missing: `gh api repos/{owner}/{repo}/labels/factory` failing → `gh api repos/{owner}/{repo}/labels -f name=factory -f color=5319e7 -f description="Opened by a factory routine"`. Then `gh api repos/{owner}/{repo}/issues/<pr>/labels -f 'labels[]=factory'`. A `quick` issue's PR also gets `factory:quick`, which marks a run whose open questions the agent settled alone (create it the same way, color `fbca04`, description `Fast-lane run: the agent took the DECISIONs`).
 9. Fill the pre-review's `agent-head:` line (edit that line in place, so the evidence stays byte for byte) with `gh api repos/{owner}/{repo}/pulls/<pr> --jq .head.sha`, set its verdict per the `factory:pre-review` skill § Verdict now that the loops and evidence are known, then post it on the PR: `gh api repos/{owner}/{repo}/issues/<pr>/comments -F body=@<file>`.
 
 Done when the PR URL is printed. Leave the issue open: the merge closes it.
