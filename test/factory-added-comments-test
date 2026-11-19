@@ -1,0 +1,29 @@
+#!/bin/bash
+set -euo pipefail
+root="$(cd "$(dirname "$0")/.." && pwd)"
+repo=$(mktemp -d)
+trap 'rm -rf "$repo"' EXIT
+cd "$repo"
+
+git init -q -b main
+git config user.email test@example.com
+git config user.name test
+printf 'a = 1\n' > app.rb
+git add . && git commit -qm base
+git checkout -qb work
+printf 'a = 1\n# Why: the bank rounds down\nb = 2\n' > app.rb
+printf '#!/bin/bash\n# frozen_string_literal: true\necho hi # trailing\n' > run.sh
+printf '// @vitest-environment jsdom\n// Restates the code\nconst x = 1\n' > ui.ts
+printf '# A heading, not a comment\n' > notes.md
+git add . && git commit -qm work
+
+got=$("$root/bin/factory-added-comments" main)
+want='app.rb:2: # Why: the bank rounds down
+ui.ts:2: // Restates the code'
+
+if [ "$got" = "$want" ]; then
+  echo "ok   lists prose comments, skips pragmas, shebangs and Markdown"
+else
+  printf 'FAIL\n--- got\n%s\n--- want\n%s\n' "$got" "$want"
+  exit 1
+fi

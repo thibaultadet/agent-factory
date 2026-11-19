@@ -1,0 +1,26 @@
+#!/bin/bash
+# Lists the comment lines this branch adds, one per line: `file:line: text`.
+#
+#   factory-added-comments [base]    base defaults to origin/main
+#
+# The fallback for projects whose docs/agents/factory.md § Coding standards names no
+# added-comments command. Skips Markdown, shebangs and tool pragmas (linter, type-checker,
+# test-environment directives), which are not prose.
+set -euo pipefail
+
+base="${1:-origin/main}"
+
+git diff --unified=0 --no-color "$base"...HEAD -- . ':(exclude)*.md' |
+  awk '
+    /^\+\+\+ / { file = substr($0, 7); next }
+    /^@@/ { split($3, hunk, ","); line = substr(hunk[1], 2) + 0; next }
+    /^\+/ {
+      text = substr($0, 2)
+      if (text ~ /^[[:space:]]*(#|\/\/|\/\*|\*([ \/]|$)|\{\/\*|<!--|--[[:space:]])/ &&
+          text !~ /^[[:space:]]*#!/ &&
+          text !~ /rubocop:|eslint-|biome-ignore|prettier-ignore|@ts-|@vitest-environment|@jest-environment|frozen_string_literal|noqa|type: ignore|pylint:|nolint/) {
+        printf "%s:%d: %s\n", file, line, text
+      }
+      line++
+    }
+  '

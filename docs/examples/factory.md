@@ -15,6 +15,8 @@ One row per area of the repo. A change under an area runs its lint, then its tes
 
 `docs/coding-standards.md`, plus the stack doc it points to for each area.
 
+- **Added comments**: `bin/added-comments {base}`. It lists every comment line the branch adds against `{base}`, as `file:line: text`. Optional: without it, the factory runs its own `factory-added-comments`.
+
 ## Verification
 
 - **Skill**: `verify-app`; its `## Mockup` section is the mockup comparison.

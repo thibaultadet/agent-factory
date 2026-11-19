@@ -4,7 +4,7 @@ description: Cleans the branch's commits, checks the pre-review points, pushes i
 allowed-tools: Bash, Skill
 ---
 
-Turn the current branch into a reviewable PR: a clean history, pushed, with a body written per the `pr` skill.
+Turn the current branch into a reviewable PR: a clean history, pushed, with a body written per the `mattpocock-skills:pr` skill.
 
 ## 1. Gather context
 
@@ -34,10 +34,7 @@ Done when every point has a verdict backed by code you read, and the user has de
 
 Target: each commit is one logical change, and its message follows the repo's convention (read it from `git log main --oneline -20`, e.g. `type(scope): summary`). WIP, `fixup`, typo and "address review" commits fold into the commit they fix.
 
-First, the **comment pass**: commits made after the last review reach the PR unchecked. List every comment the branch adds:
-```sh
-git diff main...HEAD -U0 -- . ':!*.md' | grep -E '^(\+\+\+ |\+\s*(#|//|/\*|\{/\*))'
-```
+First, the **comment pass**: commits made after the last review reach the PR unchecked. List every comment the branch adds with the added-comments command of `docs/agents/factory.md` § Coding standards, `{base}` = `main` (none named → `factory-added-comments main`).
 Hold each one against the comment rule of the coding standards doc `docs/agents/factory.md` § Coding standards names. One that restates the code, a commit message or a ticket, or heads a module, class or method, goes: delete it, or rename the code it explains. Fold each removal into the commit that added the comment (`git log -S '<text>'`), within the history rewrite below.
 
 - History already meets the target → skip to step 4.
@@ -61,7 +58,7 @@ Done when the history matches the target the user approved, sits on `$base`, and
 The **linked issue** is the one the branch or commits name (e.g. `issue/<n>`, `#<n>`).
 
 - **Title**: `#<n> ` first when there is a linked issue, then under 70 chars, imperative, in English.
-- **Body**: per the `pr` skill (Summary, Evidence, Merge Danger), in English. Evidence is what actually ran in this session or can run now (tests, command output); with none, the Evidence section says so. Add `Closes #<n>` for the linked issue. With a pre-review, add a `## Pre-review` section: every point, numbered as in the comment, with its step-2 verdict. End with:
+- **Body**: call the Skill tool with `mattpocock-skills:pr` and follow it, in English. Evidence is what actually ran in this session or can run now (tests, command output); with none, the Evidence section says so. Add `Closes #<n>` for the linked issue. With a pre-review, add a `## Pre-review` section: every point, numbered as in the comment, with its step-2 verdict. End with:
   ```
   🤖 Generated with [Claude Code](https://claude.com/claude-code)
   ```
