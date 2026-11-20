@@ -18,6 +18,8 @@ A `quick` issue skipped triage: no human settled its open questions, so you sett
 
 Red-green-refactor: one failing test, the code that passes it, repeat; refactor at the end.
 
+A **refactor** (the issue changes no behaviour) starts green: the existing examples already pin its behaviour. Move each example with the code it pins and keep it green. Add an example only for a decision that no existing example pins, at its owner (coding standards § Testing). A test diff larger than the production diff is a signal to look for duplicates.
+
 ## Feedback loops
 
 Run the lint then test commands of `docs/agents/factory.md` § Feedback loops for each area the change touches, and get them **green** before every commit. No such section → comment on the issue that the project defines no feedback loops, and end the report with `BLOCKED: no feedback loops in docs/agents/factory.md`.
