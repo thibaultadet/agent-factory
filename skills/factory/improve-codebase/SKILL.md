@@ -33,7 +33,7 @@ Done when every grilling question has an answer and the design is settled.
 
 ## 4. File the issue
 
-The review and publish steps below read an issue. Open one for the candidate: `gh api repos/{owner}/{repo}/issues -f title=<title> -F body=@<file> -f 'labels[]=enhancement'`. Its body holds the problem, the design the grilling settled, the acceptance criteria, and a `## Mockup` section reading `No visible change` (a refactor keeps every screen as is; `${CLAUDE_PLUGIN_ROOT}/reviewers/mockup-section.md`), then the line `Filed by the improve-codebase routine (factory:improve-codebase).` Call its number `<n>`.
+The review and publish steps below read an issue. Open one for the candidate: `gh api repos/{owner}/{repo}/issues -f title=<title> -F body=@<file> -f 'labels[]=enhancement'`. Its body holds the problem, the design the grilling settled, the acceptance criteria (behaviour kept, each citing the existing examples that pin it; a new spec only for a decision the refactor adds), and a `## Mockup` section reading `No visible change` (a refactor keeps every screen as is; `${CLAUDE_PLUGIN_ROOT}/reviewers/mockup-section.md`), then the line `Filed by the improve-codebase routine (factory:improve-codebase).` Call its number `<n>`.
 
 Rename the session's branch: `git branch -m claude/<n>-<slug>`, the slug 3 to 5 words of the title, kebab-case. Note the start time: `date -u +%Y-%m-%dT%H:%M:%SZ`.
 
@@ -41,7 +41,7 @@ Done when the issue exists, its number is known and the branch carries it.
 
 ## 5. Build, review, publish
 
-Follow `${CLAUDE_PLUGIN_ROOT}/skills/factory/implement-issue/SKILL.md` from § 2 to the end for issue `<n>`, parent `main`. Its builder builds with the `tdd` skill through `implement.md`; the build is done when the new tests are green and the existing test suite of every touched area of `docs/agents/factory.md` § Feedback loops passes. Its § 1 does not apply: this routine filed the issue and ran the config check in this routine's § 1. The missing sections noted there go on the *Manual* line of `implement-issue.md` § 4.
+Follow `${CLAUDE_PLUGIN_ROOT}/skills/factory/implement-issue/SKILL.md` from § 2 to the end for issue `<n>`, parent `main`. Its builder builds with the `tdd` skill through `implement.md`; the build is done when the existing test suite of every touched area of `docs/agents/factory.md` § Feedback loops passes, each moved behaviour still pinned by one example (`implement.md` § Build, refactor). Its § 1 does not apply: this routine filed the issue and ran the config check in this routine's § 1. The missing sections noted there go on the *Manual* line of `implement-issue.md` § 4.
 
 Two additions to its § 4: the PR body opens with `Opened by the improve-codebase routine (factory:improve-codebase).`, and the PR also gets the `factory:improve` label, which marks the improvements no one asked for (create it like `factory`, color `0e8a16`, description `Opened by the improve-codebase routine`).
 
