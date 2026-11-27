@@ -63,9 +63,9 @@ The **linked issue** is the one the branch or commits name (e.g. `issue/<n>`, `#
   🤖 Generated with [Claude Code](https://claude.com/claude-code)
   ```
 - PR exists → carry over its `## Issues` section verbatim (`gh pr view --json body`); `take-over-pr` reads it.
-- Write the body to a file (`mktemp`), so Mermaid and code blocks reach GitHub intact.
+- Write the body to a file (`mktemp`), so Mermaid and code blocks reach GitHub intact. When it holds a ` ```mermaid ` block, parse it before posting: `bunx @mermaid-js/mermaid-cli@11.4.2 -q -i <body file> -o "$(mktemp -d)/out.md"` exits non-zero on a diagram GitHub cannot render and names the line. The usual culprits: a `;` inside a message (Mermaid reads it as a statement break) and a bare `<word>` (GitHub reads it as HTML).
 
-Done when the title and the body file exist.
+Done when the title and the body file exist, and every Mermaid block parses.
 
 ## 5. Push and open
 

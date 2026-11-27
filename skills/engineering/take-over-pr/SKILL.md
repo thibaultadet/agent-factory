@@ -49,14 +49,14 @@ Read the body of every sibling whose title touches what the PR does.
 
 **Pre-review**: the latest PR comment whose body starts with `<!-- pre-review -->`. Its numbered points are the attention points. Its `Manual:` line lists checks only a human can run.
 
-If the spec or the pre-review is missing, say so and review with the one you have.
+If the spec is missing, say so and review with the pre-review. No pre-review means no reviewer ran on the branch: dispatch the `factory:standards` agent on it (parent `baseRefName`, issue from the spec) and take its findings as the pre-review points.
 
 ## 4. Quick review
 
 Read the diff (`git diff origin/main...HEAD`) with both inputs next to it. Give every item a verdict:
 
 - **Each acceptance criterion / interface item**: ✅ implemented (cite `file:line`, plus the spec covering it) · ⚠️ partial · ❌ missing.
-- **Each pre-review point**, checked against the code as it is now (after the rebase): 🔴 still true · ✅ fixed · ⚪ false positive (say why).
+- **Each pre-review point**, checked against the code as it is now (after the rebase): 🔴 still true · ✅ fixed · ⚪ false positive (say why). A point the PR body already dismissed gets its own verdict again: a dismissal that contradicts the issue's wording is 🔴.
 - **The mockup**, when the spec names one: each screen the PR changes, rendered by you side by side with its mockup → ✅ matches · ⚠️ differences (list each one). A pre-review that sends the mockup to `Manual:` hands that render to you.
 - Anything the rebase changed in behaviour, even if both sides were fine alone.
 - Shared code `main` gained since the branch diverged (a concern, hook, component or service: `git diff --stat <old base> origin/main`) that the PR's new code re-implements: ❌ owned by this PR, even when a sibling file still does it by hand.
